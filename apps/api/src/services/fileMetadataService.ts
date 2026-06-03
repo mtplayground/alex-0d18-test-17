@@ -70,6 +70,31 @@ export class FileMetadataService {
 
     throw new Error("Unable to allocate a unique link ID");
   }
+
+  async findByLinkId(linkId: string): Promise<FileMetadata | undefined> {
+    if (!linkId.trim()) {
+      return undefined;
+    }
+
+    const file = await this.prisma.file.findUnique({
+      where: {
+        linkId
+      }
+    });
+
+    if (!file) {
+      return undefined;
+    }
+
+    return {
+      linkId: file.linkId,
+      originalFilename: file.originalFilename,
+      contentType: file.contentType,
+      sizeBytes: Number(file.sizeBytes),
+      storageKey: file.storageKey,
+      createdAt: file.createdAt
+    };
+  }
 }
 
 export function createFileMetadataService(

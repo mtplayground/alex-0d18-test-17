@@ -2,6 +2,7 @@ import cors from "cors";
 import express, { type ErrorRequestHandler, type RequestHandler } from "express";
 import type { ApiErrorResponse, HealthResponse } from "@myclawteam/shared";
 import { getHttpError } from "./http/errors.js";
+import { createDownloadRouter } from "./routes/download.js";
 import { createFilesRouter } from "./routes/files.js";
 
 const notFoundHandler: RequestHandler = (req, res) => {
@@ -47,6 +48,7 @@ export function createApp() {
   });
 
   app.use("/api/files", createFilesRouter());
+  app.use(createDownloadRouter());
 
   app.use(notFoundHandler);
   app.use(errorHandler);
