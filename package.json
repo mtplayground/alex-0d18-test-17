@@ -19,6 +19,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prisma:generate": "prisma generate",
+    "prisma:migrate:deploy": "prisma migrate deploy",
     "typecheck": "npm run build --workspace @myclawteam/shared && npm run typecheck --workspace @myclawteam/api && npm run typecheck --workspace @myclawteam/web",
     "start": "npm run start --workspace @myclawteam/api"
   },

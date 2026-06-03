@@ -6,3 +6,14 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model File {
+  linkId           String   @id @map("link_id") @db.VarChar(32)
+  originalFilename String   @map("original_filename") @db.Text
+  contentType      String   @map("content_type") @db.Text
+  sizeBytes        BigInt   @map("size_bytes") @db.BigInt
+  storageKey       String   @unique @map("storage_key") @db.Text
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("files")
+}
