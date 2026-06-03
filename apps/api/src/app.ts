@@ -21,11 +21,16 @@ const notFoundHandler: RequestHandler = (req, res) => {
   res.status(404).json(body);
 };
 
-const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
+
   const httpError = getHttpError(err);
   const statusCode = httpError?.statusCode ?? 500;
   const code = httpError?.code ?? "internal_server_error";
-  const message = err instanceof Error ? err.message : "Unexpected server error";
+  const message = httpError?.message ?? "Unexpected server error";
   const body: ApiErrorResponse = {
     error: {
       code,

@@ -13,7 +13,11 @@ describe("POST /api/files", () => {
   });
 
   afterEach(() => {
-    process.env.MAX_FILE_SIZE_BYTES = originalMaxFileSizeBytes;
+    if (originalMaxFileSizeBytes === undefined) {
+      delete process.env.MAX_FILE_SIZE_BYTES;
+    } else {
+      process.env.MAX_FILE_SIZE_BYTES = originalMaxFileSizeBytes;
+    }
   });
 
   it("streams an uploaded file to storage and records metadata", async () => {
@@ -95,6 +99,35 @@ describe("POST /api/files", () => {
     const response = await request(app).post("/api/files").field("note", "hello").expect(400);
 
     expect(response.body.error.code).toBe("unexpected_field");
+  });
+
+  it("does not expose internal storage error details", async () => {
+    const putObject = vi.fn(async () => {
+      throw new Error("storage secret: bucket credentials rejected");
+    });
+    const create = vi.fn();
+    const app = createApp({
+      files: {
+        storageService: { putObject } as unknown as StorageService,
+        fileMetadataService: { create } as unknown as FileMetadataService
+      }
+    });
+
+    const response = await request(app)
+      .post("/api/files")
+      .attach("file", Buffer.from("hello"), {
+        filename: "hello.txt",
+        contentType: "text/plain"
+      })
+      .expect(500);
+
+    expect(response.body).toEqual({
+      error: {
+        code: "internal_server_error",
+        message: "Unexpected server error"
+      }
+    });
+    expect(create).not.toHaveBeenCalled();
   });
 });
 
