@@ -11,7 +11,7 @@ import {
   type StorageService
 } from "../storage/storageService.js";
 
-interface DownloadRouterOptions {
+export interface DownloadRouterOptions {
   fileMetadataService?: FileMetadataService;
   storageService?: StorageService;
 }
