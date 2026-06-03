@@ -21,6 +21,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "test": "npm run test --workspace @myclawteam/api",
+    "test:e2e": "npm run test:e2e --workspace @myclawteam/api",
     "typecheck": "npm run build --workspace @myclawteam/shared && npm run typecheck --workspace @myclawteam/api && npm run typecheck --workspace @myclawteam/web",
     "start": "npm run start --workspace @myclawteam/api"
   },
