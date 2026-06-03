@@ -11,7 +11,7 @@
     "build": "npm run build --workspace @myclawteam/shared && npm run build --workspace @myclawteam/api && npm run build --workspace @myclawteam/web",
     "build:api": "npm run build --workspace @myclawteam/api",
     "build:web": "npm run build --workspace @myclawteam/web",
-    "check": "npm run typecheck && npm run lint && npm run format:check",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
     "dev:api": "npm run dev --workspace @myclawteam/api",
     "dev:web": "npm run dev --workspace @myclawteam/web",
     "format": "prettier --write .",
@@ -20,6 +20,7 @@
     "lint:fix": "eslint . --fix",
     "prisma:generate": "prisma generate",
     "prisma:migrate:deploy": "prisma migrate deploy",
+    "test": "npm run test --workspace @myclawteam/api",
     "typecheck": "npm run build --workspace @myclawteam/shared && npm run typecheck --workspace @myclawteam/api && npm run typecheck --workspace @myclawteam/web",
     "start": "npm run start --workspace @myclawteam/api"
   },

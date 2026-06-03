@@ -2,8 +2,13 @@ import cors from "cors";
 import express, { type ErrorRequestHandler, type RequestHandler } from "express";
 import type { ApiErrorResponse, HealthResponse } from "@myclawteam/shared";
 import { getHttpError } from "./http/errors.js";
-import { createDownloadRouter } from "./routes/download.js";
-import { createFilesRouter } from "./routes/files.js";
+import { createDownloadRouter, type DownloadRouterOptions } from "./routes/download.js";
+import { createFilesRouter, type FilesRouterOptions } from "./routes/files.js";
+
+export interface AppOptions {
+  download?: DownloadRouterOptions;
+  files?: FilesRouterOptions;
+}
 
 const notFoundHandler: RequestHandler = (req, res) => {
   const body: ApiErrorResponse = {
@@ -31,7 +36,7 @@ const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   res.status(statusCode).json(body);
 };
 
-export function createApp() {
+export function createApp(options: AppOptions = {}) {
   const app = express();
 
   app.disable("x-powered-by");
@@ -47,8 +52,8 @@ export function createApp() {
     res.json(body);
   });
 
-  app.use("/api/files", createFilesRouter());
-  app.use(createDownloadRouter());
+  app.use("/api/files", createFilesRouter(options.files));
+  app.use(createDownloadRouter(options.download));
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -18,7 +18,7 @@ interface ParsedUpload {
   storageKey: string;
 }
 
-interface FilesRouterOptions {
+export interface FilesRouterOptions {
   storageService?: StorageService;
   fileMetadataService?: FileMetadataService;
 }
