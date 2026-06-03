@@ -13,13 +13,10 @@ export function App() {
           <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
             File sharing workspace
           </p>
-          <h1 className="mt-4 text-4xl font-bold tracking-normal sm:text-5xl">
-            myClawTeam
-          </h1>
+          <h1 className="mt-4 text-4xl font-bold tracking-normal sm:text-5xl">myClawTeam</h1>
           <p className="mt-5 text-lg leading-8 text-slate-700">
-            Upload, share, and retrieve files through short links. The upload
-            workflow and storage-backed downloads will be added in the next
-            implementation issues.
+            Upload, share, and retrieve files through short links. The upload workflow and
+            storage-backed downloads will be added in the next implementation issues.
           </p>
         </div>
 
