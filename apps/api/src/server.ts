@@ -1,20 +1,9 @@
 import { createServer } from "node:http";
 import { createApp } from "./app.js";
-
-function readPort(value: string | undefined): number {
-  const rawPort = value ?? "8080";
-  const port = Number.parseInt(rawPort, 10);
-
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error(`PORT must be an integer between 1 and 65535; received "${rawPort}"`);
-  }
-
-  return port;
-}
+import { readServerConfig } from "./config/env.js";
 
 try {
-  const host = process.env.HOST ?? "0.0.0.0";
-  const port = readPort(process.env.PORT);
+  const { host, port } = readServerConfig();
   const server = createServer(createApp());
 
   server.listen(port, host, () => {

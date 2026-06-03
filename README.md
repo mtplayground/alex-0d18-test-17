@@ -23,6 +23,12 @@ npm install
 
 ## Development
 
+Copy the example environment file and fill in deployment-specific values:
+
+```bash
+cp .env.example .env
+```
+
 Run the API:
 
 ```bash
@@ -59,6 +65,8 @@ HOST=0.0.0.0 PORT=8080 npm start
 
 The API reads PostgreSQL and object storage settings from environment variables when the corresponding clients are created.
 
+- `HOST` - API bind host, defaults to `0.0.0.0`.
+- `PORT` - API port, defaults to `8080`.
 - `DATABASE_URL` - PostgreSQL connection string used by Prisma.
 - `OBJECT_STORAGE_ENDPOINT` - S3-compatible object storage endpoint.
 - `OBJECT_STORAGE_REGION` - S3-compatible object storage region.
@@ -66,5 +74,6 @@ The API reads PostgreSQL and object storage settings from environment variables 
 - `OBJECT_STORAGE_SECRET_ACCESS_KEY` - object storage secret key.
 - `OBJECT_STORAGE_BUCKET` - object storage bucket name.
 - `OBJECT_STORAGE_FORCE_PATH_STYLE` - optional boolean, defaults to `true`.
+- `MAX_FILE_SIZE_BYTES` - maximum upload size, defaults to `10485760`.
 
 The current backend exposes `GET /api/health` as the initial API surface. File upload, PostgreSQL metadata, object storage, and download routes are scheduled for later issues.

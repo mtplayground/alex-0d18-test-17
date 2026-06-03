@@ -1,12 +1,12 @@
 import { PrismaClient } from "@prisma/client";
-import { readRequiredEnv, type Environment } from "../config/env.js";
+import { readDatabaseConfig, type Environment } from "../config/env.js";
 
 const globalForPrisma = globalThis as typeof globalThis & {
   myClawTeamPrisma?: PrismaClient;
 };
 
 export function readDatabaseUrl(env: Environment = process.env): string {
-  return readRequiredEnv("DATABASE_URL", env);
+  return readDatabaseConfig(env).url;
 }
 
 export function createPrismaClient(env: Environment = process.env): PrismaClient {
