@@ -55,6 +55,12 @@ Generate the Prisma client after dependency installation or schema changes:
 DATABASE_URL=postgres://user:password@host:5432/database npm run prisma:generate
 ```
 
+Apply committed Prisma migrations:
+
+```bash
+DATABASE_URL=postgres://user:password@host:5432/database npm run prisma:migrate:deploy
+```
+
 ## Production Start
 
 ```bash
