@@ -1,11 +1,12 @@
 import { useRef, useState, type DragEvent } from "react";
-import { AlertCircle, CheckCircle2, FileUp, RotateCcw, Upload, X } from "lucide-react";
+import { AlertCircle, Check, CheckCircle2, Copy, FileUp, RotateCcw, Upload, X } from "lucide-react";
 import type { UploadFileResponse } from "@myclawteam/shared";
 import { uploadFile, UploadRequestError } from "./api/files";
 
 const DEFAULT_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 type UploadPhase = "idle" | "ready" | "uploading" | "success" | "error";
+type CopyState = "idle" | "copied" | "error";
 
 interface UploadState {
   phase: UploadPhase;
@@ -23,15 +24,20 @@ const initialUploadState: UploadState = {
 export function App() {
   const [uploadState, setUploadState] = useState<UploadState>(initialUploadState);
   const [isDragging, setIsDragging] = useState(false);
+  const [copyState, setCopyState] = useState<CopyState>("idle");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const maxFileSizeBytes = readMaxFileSizeBytes();
 
   const selectedFile = uploadState.file;
   const canUpload = uploadState.phase === "ready" && selectedFile;
   const isUploading = uploadState.phase === "uploading";
+  const shareUrl = uploadState.response
+    ? buildShareUrl(uploadState.response.file.linkId)
+    : undefined;
 
   const selectFiles = (files: FileList | null) => {
     const nextFile = validateFileSelection(files, maxFileSizeBytes);
+    setCopyState("idle");
 
     if (nextFile instanceof Error) {
       setUploadState({
@@ -54,6 +60,7 @@ export function App() {
       return;
     }
 
+    setCopyState("idle");
     setUploadState({
       phase: "uploading",
       file: selectedFile,
@@ -89,7 +96,21 @@ export function App() {
       fileInputRef.current.value = "";
     }
 
+    setCopyState("idle");
     setUploadState(initialUploadState);
+  };
+
+  const copyShareUrl = async () => {
+    if (!shareUrl) {
+      return;
+    }
+
+    try {
+      await copyText(shareUrl);
+      setCopyState("copied");
+    } catch {
+      setCopyState("error");
+    }
   };
 
   const handleDrop = (event: DragEvent<HTMLLabelElement>) => {
@@ -208,14 +229,47 @@ export function App() {
               </div>
             ) : null}
 
-            {uploadState.phase === "success" && uploadState.response ? (
+            {uploadState.phase === "success" && uploadState.response && shareUrl ? (
               <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
                 <div className="flex gap-2">
                   <CheckCircle2 aria-hidden="true" className="mt-0.5 shrink-0" size={18} />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="font-medium">Upload complete</p>
-                    <p className="mt-1 break-all">Link ID: {uploadState.response.file.linkId}</p>
+                    <p className="mt-1 break-all text-emerald-800">
+                      {uploadState.response.file.originalFilename}
+                    </p>
                   </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                    Share link
+                  </label>
+                  <div className="mt-2 flex overflow-hidden rounded-md border border-emerald-200 bg-white">
+                    <input
+                      className="min-w-0 flex-1 bg-white px-3 py-2 text-sm text-slate-800 outline-none"
+                      value={shareUrl}
+                      readOnly
+                      onFocus={(event) => event.currentTarget.select()}
+                    />
+                    <button
+                      type="button"
+                      className="inline-flex h-10 w-24 shrink-0 items-center justify-center gap-2 border-l border-emerald-200 px-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                      onClick={copyShareUrl}
+                    >
+                      {copyState === "copied" ? (
+                        <Check aria-hidden="true" size={16} />
+                      ) : (
+                        <Copy aria-hidden="true" size={16} />
+                      )}
+                      {copyState === "copied" ? "Copied" : "Copy"}
+                    </button>
+                  </div>
+                  {copyState === "error" ? (
+                    <p className="mt-2 text-xs text-red-700">
+                      Copy failed. Select the link and copy it manually.
+                    </p>
+                  ) : null}
                 </div>
               </div>
             ) : null}
@@ -302,11 +356,40 @@ function statusCopy(phase: UploadPhase): string {
     case "uploading":
       return "Uploading file.";
     case "success":
-      return "File uploaded.";
+      return "Share link ready.";
     case "error":
       return "Action needed.";
     case "idle":
       return "No file selected.";
+  }
+}
+
+function buildShareUrl(linkId: string): string {
+  return new URL(`/${encodeURIComponent(linkId)}`, window.location.origin).toString();
+}
+
+async function copyText(text: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "true");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.append(textarea);
+  textarea.select();
+
+  try {
+    const didCopy = document.execCommand("copy");
+
+    if (!didCopy) {
+      throw new Error("Copy command failed");
+    }
+  } finally {
+    textarea.remove();
   }
 }
 
