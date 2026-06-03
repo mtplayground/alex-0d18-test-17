@@ -11,3 +11,15 @@ export interface ApiErrorResponse {
     message: string;
   };
 }
+
+export interface UploadedFile {
+  linkId: string;
+  originalFilename: string;
+  contentType: string;
+  sizeBytes: number;
+  createdAt: string;
+}
+
+export interface UploadFileResponse {
+  file: UploadedFile;
+}

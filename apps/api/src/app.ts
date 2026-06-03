@@ -1,6 +1,8 @@
 import cors from "cors";
 import express, { type ErrorRequestHandler, type RequestHandler } from "express";
 import type { ApiErrorResponse, HealthResponse } from "@myclawteam/shared";
+import { getHttpError } from "./http/errors.js";
+import { createFilesRouter } from "./routes/files.js";
 
 const notFoundHandler: RequestHandler = (req, res) => {
   const body: ApiErrorResponse = {
@@ -14,15 +16,18 @@ const notFoundHandler: RequestHandler = (req, res) => {
 };
 
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+  const httpError = getHttpError(err);
+  const statusCode = httpError?.statusCode ?? 500;
+  const code = httpError?.code ?? "internal_server_error";
   const message = err instanceof Error ? err.message : "Unexpected server error";
   const body: ApiErrorResponse = {
     error: {
-      code: "internal_server_error",
+      code,
       message
     }
   };
 
-  res.status(500).json(body);
+  res.status(statusCode).json(body);
 };
 
 export function createApp() {
@@ -40,6 +45,8 @@ export function createApp() {
 
     res.json(body);
   });
+
+  app.use("/api/files", createFilesRouter());
 
   app.use(notFoundHandler);
   app.use(errorHandler);
