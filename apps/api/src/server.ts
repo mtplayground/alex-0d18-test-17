@@ -7,7 +7,9 @@ try {
   const server = createServer(createApp());
 
   server.listen(port, host, () => {
-    console.log(`myClawTeam API listening on http://${host}:${port}`);
+    if (process.env.LOG_STARTUP === "true") {
+      console.log(`myClawTeam API listening on http://${host}:${port}`);
+    }
   });
 
   server.on("error", (error) => {
