@@ -2,6 +2,7 @@
   "name": "myclawteam",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -10,11 +11,27 @@
     "build": "npm run build --workspace @myclawteam/shared && npm run build --workspace @myclawteam/api && npm run build --workspace @myclawteam/web",
     "build:api": "npm run build --workspace @myclawteam/api",
     "build:web": "npm run build --workspace @myclawteam/web",
+    "check": "npm run typecheck && npm run lint && npm run format:check",
     "dev:api": "npm run dev --workspace @myclawteam/api",
     "dev:web": "npm run dev --workspace @myclawteam/web",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "npm run build --workspace @myclawteam/shared && npm run typecheck --workspace @myclawteam/api && npm run typecheck --workspace @myclawteam/web",
     "start": "npm run start --workspace @myclawteam/api"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "eslint": "^9.28.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.2.0",
+    "prettier": "^3.5.3",
+    "typescript-eslint": "^8.33.0"
   }
 }
