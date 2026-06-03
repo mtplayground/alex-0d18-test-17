@@ -1,0 +1,56 @@
+# myClawTeam Architecture Plan
+
+## Product Direction
+
+myClawTeam is a small file-sharing web app: users upload a file, receive a short share link, and recipients download the original file through that link.
+
+## Module Structure
+
+- `apps/web/`: React + Tailwind frontend.
+  - Upload page with drag-and-drop/file-picker, progress, validation, and network error states.
+  - Share-link result view with copy-to-clipboard action.
+  - API client wrapper for upload requests and typed responses.
+- `apps/api/`: Express backend.
+  - `src/server.ts`: app bootstrap and listener.
+  - `src/app.ts`: Express app construction, middleware, routes, and centralized error handling.
+  - `src/routes/files.ts`: `POST /api/files` upload endpoint.
+  - `src/routes/download.ts`: `GET /:linkId` download/serve endpoint.
+  - `src/services/storage.ts`: S3-compatible object storage put/get streaming service.
+  - `src/services/files.ts`: file metadata persistence and link ID generation.
+  - `src/config/env.ts`: validated environment configuration.
+  - `src/db/prisma.ts`: Prisma client singleton.
+  - `src/types/`: shared server-local request/response and error types.
+- `packages/shared/`: shared TypeScript types used by web and API.
+  - Upload success/error response shapes.
+  - File metadata DTOs exposed to the frontend.
+- `prisma/`: Prisma schema and migrations.
+- `tests/` or colocated `*.test.ts`: unit and integration tests, with E2E covering upload to download byte integrity.
+- Root workspace files: package manager workspace config, shared TypeScript config, lint/format config, README, and `.env.example`.
+
+## Issue Dependencies
+
+- #1 creates the monorepo skeleton for `apps/web`, `apps/api`, shared README, and package workspace.
+- #2 depends on #1 and adds TypeScript, ESLint, and Prettier across both apps and shared packages.
+- #3 depends on #1 and introduces Prisma/PostgreSQL plus the S3-compatible storage client.
+- #4 depends on #1 and centralizes validated env vars for database URL, storage endpoint/credentials/bucket, public app URL, and file size limit.
+- #5 depends on #3 and adds the `files` Prisma model and migration.
+- #6 depends on #3 and builds storage streaming helpers for object put/get plus unique storage key generation.
+- #7 depends on #5 and #6 and implements multipart upload, size enforcement, metadata insert, and short link generation.
+- #8 depends on #7 and builds the upload UI workflow against `POST /api/files`.
+- #9 depends on #8 and displays/copies the returned share URL.
+- #10 depends on #5 and #6 and streams stored objects from `GET /:linkId` with correct headers and 404 handling.
+- #11 depends on #6, #7, and #10 and covers storage service plus endpoint success and failure paths.
+- #12 depends on #7 and #10 and verifies upload to link to download byte integrity.
+- #13 depends on the full backend/frontend path and finalizes error responses, README run/deploy steps, and self-hosted deployment prep.
+
+## Key Design Decisions
+
+- Use a Node package workspace so frontend, backend, and shared types can evolve together while each app keeps its own entry points.
+- Keep the backend as the source of truth for file size limits, link ID creation, storage keys, and metadata persistence.
+- Use Prisma for typed database access, with a `files` table containing `linkId`, `originalFilename`, `contentType`, `size`, `storageKey`, and `createdAt`.
+- Store object bytes only in S3-compatible object storage; PostgreSQL stores metadata and lookup keys only.
+- Stream upload/download paths where practical to avoid buffering large files in memory.
+- Return compact, typed JSON errors from API routes and handle user-facing messages in the React app.
+- Generate opaque, URL-safe short link IDs separately from storage keys so public URLs do not reveal object storage layout.
+- Keep environment parsing centralized and fail fast on missing required config.
+- Tests should mock storage for unit tests, use a test database for endpoint tests, and reserve full storage/database integration for the E2E path.
